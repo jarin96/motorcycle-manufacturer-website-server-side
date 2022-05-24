@@ -30,6 +30,27 @@ async function run() {
             const parts = await partsCollection.find(query).toArray();
             res.send(parts);
         })
+
+
+
+        // Quantity increase/Decrease
+        app.put('/updateQuantity/:id', async (req, res) => {
+            // console.log(req.body);
+            const filter = { _id: ObjectId(req.params.id) };
+            // console.log(filter);
+            const updateDoc = {
+                $set: {
+                    minimumquantity: req.body.minimumquantity,
+                    availablequantity: req.body.availablequantity
+                },
+            };
+            const result = await partsCollection.updateOne(filter, updateDoc);
+            res.send(result);
+            // console.log(req.params.id);
+
+        })
+
+
         // purchase id 
         app.get('/parts/:id', async (req, res) => {
             const id = req.params.id;
