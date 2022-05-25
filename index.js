@@ -34,7 +34,9 @@ async function run() {
         await client.connect();
         const partsCollection = client.db('welbim_website').collection('parts');
         const userCollection = client.db('welbim_website').collection('users');
-        const reviewCollection = client.db('welbim_website').collection('reviews');
+        const reviews = client.db('welbim_website').collection('reviews');
+        const orders = client.db('welbim_website').collection('orders');
+        const profile = client.db('welbim_website').collection('profile');
 
         app.get('/parts', async (req, res) => {
             const query = {};
@@ -123,6 +125,70 @@ async function run() {
             res.send(result);
         })
 
+        // Review 
+        app.post('/addReview', async (req, res) => {
+            const result = await reviews.insertOne(req.body);
+            res.send(result);
+        })
+        // Profile
+        app.post('/addInfo', async (req, res) => {
+            const result = await profile.insertOne(req.body);
+            res.send(result);
+        })
+        // profile update
+        app.put('/updateInfo/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const filter = { email: email };
+            const updateDoc = {
+                $set: req.body
+            };
+            const result = await profile.updateOne(filter, updateDoc);
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+            res.send({ result, token });
+        });
+
+
+        // Review get
+        app.get('/findReview', async (req, res) => {
+            const result = await reviews.find({}).toArray();
+            // console.log(result);
+            res.send(result);
+        })
+
+        app.get('/updateInfo/:id', async (req, res) => {
+            const id = req.params.id;
+            // const query = { _id: ObjectId(id) };
+            const part = await profile.findOne({ _id: ObjectId(id) });
+            res.send(part);
+
+        });
+        // Order Place
+
+        app.post('/confirmOrder', async (req, res) => {
+            const result = await orders.insertOne(req.body);
+            res.send(result);
+        })
+
+        // Find Individual orders
+        app.get('/myOrder/:email', async (req, res) => {
+            const userEmail = { email: req.params.email };
+            const result = await orders.find(userEmail).toArray();
+            res.send(result);
+
+        })
+
+        // cancel order
+        app.delete('/deleteProduct/:id', async (req, res) => {
+            // console.log(req.params.id);
+            const product = {
+                _id: ObjectId(req.params.id)
+            }
+
+            console.log(req.params.id);
+            const result = await orders.deleteOne(product);
+            res.send(result);
+        })
 
         // Quantity increase/Decrease
         app.put('/updateQuantity/:id', async (req, res) => {
