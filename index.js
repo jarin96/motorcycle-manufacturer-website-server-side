@@ -34,6 +34,7 @@ async function run() {
         await client.connect();
         const partsCollection = client.db('welbim_website').collection('parts');
         const userCollection = client.db('welbim_website').collection('users');
+        const reviewCollection = client.db('welbim_website').collection('reviews');
 
         app.get('/parts', async (req, res) => {
             const query = {};
@@ -91,6 +92,11 @@ async function run() {
             const users = await userCollection.find().toArray();
             res.send(users);
         })
+        app.get('/reviews', async (req, res) => {
+            const reviewer = await reviewCollection.find().toArray();
+            res.send(reviewer);
+
+        })
 
 
 
@@ -103,7 +109,12 @@ async function run() {
             const parts = await partsCollection.find(query).toArray();
             res.send(parts);
         })
-
+        // POST for Add a review in client side
+        app.post('/parts', async (req, res) => {
+            const newData = req.body;
+            const result = await partsCollection.insertOne(newData);
+            res.send(result);
+        })
 
 
         // Quantity increase/Decrease
