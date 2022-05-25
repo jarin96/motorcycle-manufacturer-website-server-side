@@ -115,6 +115,13 @@ async function run() {
             const result = await partsCollection.insertOne(newData);
             res.send(result);
         })
+        // delete a manage product
+        app.delete('/parts/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await partsCollection.deleteOne(query);
+            res.send(result);
+        })
 
 
         // Quantity increase/Decrease
