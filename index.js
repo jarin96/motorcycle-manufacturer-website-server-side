@@ -1,5 +1,6 @@
 const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken');
 const cors = require('cors');
 require('dotenv').config();
 const app = express();
@@ -16,6 +17,7 @@ async function run() {
     try {
         await client.connect();
         const partsCollection = client.db('welbim_website').collection('parts');
+        const userCollection = client.db('welbim_website').collection('users');
 
         app.get('/parts', async (req, res) => {
             const query = {};
@@ -23,6 +25,20 @@ async function run() {
             const parts = await cursor.toArray();
             res.send(parts);
         });
+
+        //For every email address user create
+        app.put('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const filter = { email: email };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: user,
+            };
+            const result = await userCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        })
+
         // For my orders
         app.get('/parts', async (req, res) => {
             const orderer = req.query.orderer;
